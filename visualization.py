@@ -68,10 +68,15 @@ def initialize_plots(skeleton_data):
   '''
   fig = plt.figure()
   axes = fig.add_subplot(111, projection='3d')
+  axes.view_init(elev=270, azim=90)
   (x_min, x_max), (y_min, y_max), (z_min, z_max) = find_bounds(skeleton_data)
-  axes.set_xlim(left=x_min, right=x_max)
+  # We do seemingly weird assignments of bounds here, but it's due to the conventions used by NiTE
+  axes.set_xlabel('X')
+  axes.set_ylabel('Y')
+  axes.set_zlabel('Z')
+  axes.set_xlim(left=x_max, right=x_min)
   axes.set_ylim(bottom=y_min, top=y_max)
-  axes.set_zlim(bottom=z_min, top=z_max)
+  axes.set_zlim(bottom=z_max, top=z_min)
   log.info('Making inital plots')
   plots = {link: axes.plot([0], [0], [0], 'bo-')[0] for link in links}
   return fig, axes, plots
@@ -128,6 +133,7 @@ def make_video(skeleton_data, out_filename):
       blit=True
   )
 
+  plt.show()
   log.info(f'Saving video to {out_filename}')
   video.save(out_filename, fps=30, extra_args=['-vcodec', 'libx264'])
 
@@ -158,5 +164,6 @@ def make_image(skeleton_data, out_filename):
       plots[link].set_xdata(xs)
       plots[link].set_ydata(ys)
       plots[link].set_3d_properties(zs)
+  plt.show()
   log.info(f'Saving image to {out_filename}')
   plt.savefig(out_filename)

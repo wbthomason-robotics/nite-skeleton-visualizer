@@ -17,14 +17,14 @@ coloredlogs.install(level='INFO', fmt='%(name)s @ [%(asctime)s] %(levelname)s:\t
 log = logging.getLogger('visualizer')
 
 
-def run(recording_filename, make_video=True, path_prefix='', start_time=None, end_time=None):
+def run(recording_filename, make_image=False, path_prefix='', start_time=None, end_time=None):
   '''The main point of entry for the viewer
   Args:
     recording_filename (string): The path to the skeleton recording file to use for the
     visualization.
 
-    make_video (bool, optional): Make an animation if True, output a single frame if False. Defaults
-    to True.
+    make_image (bool, optional): Make an animation if False, output a single frame if True. Defaults
+    to False.
 
     path_prefix (string, optional): Save the generated visualization with the given prefix. Defaults
     to "".
@@ -62,15 +62,15 @@ def run(recording_filename, make_video=True, path_prefix='', start_time=None, en
   start_time = start_time if start_time else skeleton_frames[0][1] / 1e6
   end_time = end_time if end_time else skeleton_frames[-1][1] / 1e6
   # TODO: Verify more rigorously that the timestamps can be interpreted as microseconds
-  log.info(f'Creating {"video" if make_video else "image"}')
+  log.info(f'Creating {"image" if make_image else "video"}')
   log.info(f'Starting at {start_time}s, ending at {end_time}s')
   start_time *= 1e6
   end_time *= 1e6
   skeleton_frames = [(s, t) for (s, t) in skeleton_frames if t >= start_time and t <= end_time]
-  if make_video:
-    visualization.make_video(skeleton_frames, f'{path_prefix}{recording_filename}.mp4')
-  else:
+  if make_image:
     visualization.make_image(skeleton_frames, f'{path_prefix}{recording_filename}.png')
+  else:
+    visualization.make_video(skeleton_frames, f'{path_prefix}{recording_filename}.mp4')
 
 
 if __name__ == '__main__':
