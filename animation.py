@@ -1,6 +1,7 @@
 '''Functions for generating animations from NiTE skeletons'''
 
 import logging
+from math import inf
 
 from matplotlib import pyplot as plt
 from matplotlib import animation
@@ -15,7 +16,7 @@ from skeletons import (NITE_JOINT_HEAD, NITE_JOINT_LEFT_ELBOW,
                        NITE_JOINT_TORSO)
 
 # pylint: disable=C0103
-log = logging.getLogger('viewer')
+log = logging.getLogger('animator')
 
 links = [
     (NITE_JOINT_HEAD, NITE_JOINT_NECK),
@@ -45,20 +46,35 @@ def make_video(skeleton_data, out_filename):
     Nothing
   '''
   fig = plt.figure()
-  axes = Axes3D(fig)
+  axes = fig.add_subplot(111, projection='3d')
   # Note that we make the assumption that the interval between frames is equal throughout. This
   # seems to hold mostly true, empirically.
   interval_microseconds = skeleton_data[1][1] - skeleton_data[0][1]
-  interval = interval_microseconds * 1e3
+  interval = int(interval_microseconds / 1e3)
+  x_min = inf
+  x_max = -inf
+  y_min = inf
+  y_max = -inf
+  z_min = inf
+  z_max = -inf
+  for frame in skeleton_data:
+    for joint in frame[0].joints:
+      x_min, x_max = min(x_min, joint.position.x), max(x_max, joint.position.x)
+      y_min, y_max = min(y_min, joint.position.y), max(y_max, joint.position.y)
+      z_min, z_max = min(z_min, joint.position.z), max(z_max, joint.position.z)
 
-  plots = {link: axes.plot([], [], zs=[], lw=2)[0] for link in links}
-  # plot = {link: axes.plot([], [], zs=[], lw=2)[0] for link in links}
+  axes.set_xlim(left=x_min, right=x_max)
+  axes.set_ylim(bottom=y_min, top=x_max)
+  axes.set_zlim(bottom=z_min, top=z_max)
+  log.info('Making inital plots')
+  plots = {link: axes.plot([0], [0], [0], 'bo-')[0] for link in links}
 
   def init():
     '''Initializes the animation'''
     for link in links:
-      plots[link].set_data([], [])
-      plots[link].set_3d_properties(zs=[])
+      plots[link].set_xdata([0])
+      plots[link].set_ydata([0])
+      plots[link].set_3d_properties([0])
     return tuple(plots.values())
 
   def animate(i):
@@ -74,10 +90,12 @@ def make_video(skeleton_data, out_filename):
         xs = (skel[top].x, skel[bottom].x)
         ys = (skel[top].y, skel[bottom].y)
         zs = (skel[top].z, skel[bottom].z)
-        plots[link].set_data(xs, ys)
-        plots[link].set_3d_properties(zs=zs)
+        plots[link].set_xdata(xs)
+        plots[link].set_ydata(ys)
+        plots[link].set_3d_properties(zs)
     return tuple(plots.values())
 
+  log.info('Creating animation')
   video = animation.FuncAnimation(
       fig,
       animate,
@@ -87,5 +105,6 @@ def make_video(skeleton_data, out_filename):
       blit=True
   )
 
+  log.info(f'Saving video to {out_filename}')
   video.save(out_filename, fps=30, extra_args=['-vcodec', 'libx264'])
   plt.show()
