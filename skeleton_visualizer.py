@@ -11,7 +11,7 @@ import coloredlogs
 import skeletons
 import animation
 
-coloredlogs.install(level='DEBUG', fmt='%(name)s @ [%(asctime)s] %(levelname)s:\t%(message)s')
+coloredlogs.install(level='INFO', fmt='%(name)s @ [%(asctime)s] %(levelname)s:\t%(message)s')
 
 # pylint: disable=C0103
 log = logging.getLogger('visualizer')
