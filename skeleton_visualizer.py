@@ -9,7 +9,7 @@ import fire
 
 import coloredlogs
 import skeletons
-import animation
+import visualization
 
 coloredlogs.install(level='INFO', fmt='%(name)s @ [%(asctime)s] %(levelname)s:\t%(message)s')
 
@@ -67,7 +67,10 @@ def run(recording_filename, make_video=True, path_prefix='', start_time=None, en
   start_time *= 1e6
   end_time *= 1e6
   skeleton_frames = [(s, t) for (s, t) in skeleton_frames if t >= start_time and t <= end_time]
-  animation.make_video(skeleton_frames, f'{path_prefix}{recording_filename}.mp4')
+  if make_video:
+    visualization.make_video(skeleton_frames, f'{path_prefix}{recording_filename}.mp4')
+  else:
+    visualization.make_image(skeleton_frames, f'{path_prefix}{recording_filename}.png')
 
 
 if __name__ == '__main__':
