@@ -82,11 +82,12 @@ def initialize_plots(skeleton_data):
   return fig, axes, plots
 
 
-def make_video(skeleton_data, out_filename):
+def make_video(skeleton_data, out_filename, show):
   '''Creates an animation from skeleton data
   Args:
     skeleton_data ((skeleton, offset) list): The data to animate
     out_filename (string): The file in which to save the video
+    show (bool): Whether or not to preview the video before saving
 
   Returns:
     Nothing
@@ -133,18 +134,22 @@ def make_video(skeleton_data, out_filename):
       blit=True
   )
 
-  plt.show()
+  if show:
+    plt.show()
+
   log.info(f'Saving video to {out_filename}')
   video.save(out_filename, fps=30, extra_args=['-vcodec', 'libx264'])
 
 
-def make_image(skeleton_data, out_filename):
+def make_image(skeleton_data, out_filename, show):
   '''Generate a static image of the skeleton
   Args:
     skeleton_data ((skeleton, offset) list): The data to visualize. The first provided frame is
     chosen.
 
     out_filename (string): The file in which to save the image.
+
+    show (bool): Whether or not to preview the video before saving
 
   Returns:
     Nothing
@@ -164,6 +169,9 @@ def make_image(skeleton_data, out_filename):
       plots[link].set_xdata(xs)
       plots[link].set_ydata(ys)
       plots[link].set_3d_properties(zs)
-  plt.show()
+
+  if show:
+    plt.show()
+
   log.info(f'Saving image to {out_filename}')
   plt.savefig(out_filename)
